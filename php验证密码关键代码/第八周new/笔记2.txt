@@ -1,0 +1,86 @@
+<?php
+namespace App\Http\Controllers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Input;
+use Validator;
+class TestForm extends Controller
+{
+    function fun1(Request $request){
+        if (Input::method() == 'GET'){
+            return view('showform');
+        }elseif (Input::method() == 'POST'){
+            $validator =  Validator::make($request->all(),[
+                'yhm'  =>  ' required | min :3 | max :6 ',
+                'age1' =>  ' required | numeric | min :1 | max :130 ',
+                'password' => ' required | required_with: password_confirmation | confirmed ',
+                'password_confirmation' => ' required ',
+                'email1'    =>  ' required | email ',
+                'sex'       =>  'required',
+            ],[
+                'required'     => ':attribute必须填写。',
+                'yhm.min'      => ':attribute至少3个字符。',
+                'yhm.max'      => ':attribute至多6个字符。',
+                'numeric'      => ':attribute年龄必须是数字类型。',
+                'age1.min'     => ':attribute至少大于或者等于1岁。',
+                'age1.max'     => ':attribute至少不能超过130岁。',
+                'confirmed'    => ':attribute两次密码必须相同。',
+                'email'        => ':attribute必须是合法的邮箱格式。'
+            ],[
+                    'yhm'      => '用户名',
+                    'age1'     => '年龄',
+                    'password' => '密码',
+                    'password_confirmation' => '确认密码',
+                    'email1'   =>  '哟想',
+                    'sex'      =>  '性别',
+                ]
+            );
+
+            if ($validator->fails()){  //验证没有通过
+                return redirect('/')
+                    ->withErrors($validator)  //验证失败，保留错误信息
+                    ->withInput();            //保留原来的输入,错误信息保留在old里面
+            }
+
+            echo "程序把数据写入数据表";
+        }
+    }
+}
+
+
+----------------
+
+<html>
+   <head>
+       <title></title>
+       <script type="text/javascript">
+           window.onload = function () {
+               document.getElementsByName('yhm')[0].value = "{{old('yhm')}}";
+               document.getElementsByName('age1')[0].value = "{{old('age1')}}";
+               document.getElementsByName('email1')[0].value = "{{old('email1')}}";
+               var xb = "{{old('sex')}}";
+               if (xb == 'male')
+                   document.getElementsByName('sex')[0].checked = 'checked';
+               else
+                   document.getElementsByName('sex')[1].checked = 'checked';
+           }
+       </script>
+   </head>
+   @foreach($errors->all() as $error)
+       <li>{{$error}}</li>
+   @endforeach
+   <form action="/" method="post">
+       {{csrf_field()}}
+       用户名<input type="text" name="yhm">{{$errors->first('yhm')}}<br />
+       年龄<input type="text" name="age1">{{$errors->first('age1')}}<br />
+       密码<input type="password" name="password">{{$errors->first('password')}}<br />
+       确认密码<input type="password" name="password_confirmation">{{$errors->first('password_confirmation')}}<br />
+       邮箱<input type="text" name="email1">{{$errors->first('email1')}}<br />
+       性别<input type="radio" name="sex" value="male">male
+           <input type="radio" name="sex" value="female">female<br />
+       <input type="submit" name="save" value="submit">
+   </form>
+</html>
+
+--------------------
+
+Route::match(['get','post'],'/', 'TestForm@fun1');
