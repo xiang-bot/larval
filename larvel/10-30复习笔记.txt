@@ -1,0 +1,331 @@
+1、控制器
+<?php
+namespace App\Http\Controllers\Home;   //控制器位置
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;   //父类Controller的位置
+class TestSjk extends Controller       //控制器TestSjk继承父类
+{
+    function fun1(){
+        echo "1111";
+    }
+    function fun2(){
+        echo "2222";
+    }
+    function fun3(){
+        echo "3333";
+    }
+}
+-----------------------------
+<?php
+//考试系统。路由要带上Home，即Home\r1
+Route::group(['prefix'=>'Home'],function (){
+    Route::get('r1','Home\TestSjk@fun1');
+    Route::get('r2','Home\TestSjk@fun2');
+    Route::get('r3','Home\TestSjk@fun3');
+});
+
+
+//考试系统管理系统,按照名称访问prefix和middleware谁在前都行
+Route::group(['prefix'=>'Admin','middleware'=>'testsession'],function (){
+    Route::get('r4','Admin\TestSjk@fun4');
+    Route::get('r5','Admin\TestSjk@fun5');
+    Route::get('r6','Admin\TestSjk@fun6')->name('six');  
+   //six是   Admin/r6的别名
+});
+----------------------------------
+2、路由
+   Route::get('/','TestView@fun1');
+   //根路由
+
+ 
+  Route::get('/login','TestView@login');
+  //get就是通过浏览器网址访问 
+
+  Route::post('/login','TestView@login');
+  //post就是通过表单提交访问，例如单击submit按钮，或者ajax执行post提交
+
+
+  Route::any('/login','TestView@login')->name('abc');
+  //any包括任何形式的访问路由，参数没有['get','post']  
+
+  Route::match(['get','post'],'/login','TestView@login')->name('abc');
+  //匹配[]中间的路由，有三个参数
+
+
+3、视图
+    包含 @include 
+     @include ('header')
+     在当前视图中添加视图
+
+
+    继承 @extends  @yield  @section  
+    父亲视图规定了视图网页的宏观外形
+    子视图显示具体内容
+
+子  数据和内容
+@extends('Home1.fuqin')
+ @section('main3')
+    xxxxxxxxxxx<br/>
+    yyyyyyyyyyyyy
+ @endsection
+
+ @section('main2')
+     aaaaaaaaaaaa<br />
+     bbbbbbbbbbbb
+ @endsection
+
+ @section('main1')
+     111111111111<br />
+     222222222222
+ @endsection
+父  外观和样式
+<h1>This is a war.</h1>
+@yield('main1')
+
+@yield('main2')
+
+@yield('main3')
+<h2>Wuhan zall goal!</h2>
+
+
+
+
+
+
+4、Input，Request
+Route::get('shuru1','TestView@fa');
+Route::get('shuru2','TestView@fb');
+Route::get('shuru3/sex/{s}/age/{a?}','TestView@fc');
+Route::get('shuru4/xxx/{x}/yyy/{y}','TestView@fd');
+---------------------
+   function fa(){
+        $all = Input::all();   //还可以接受来自表单的数据
+        dump($all);
+        $sex = $all['sex'];
+        echo $sex;
+        $age = Input::all()['age'];
+        echo $age;
+        $name = Input::all(['name','sex']);
+        dd($name);
+    }
+    function fb(Request $request){
+        $all = $request->all();   //还可以接受来自表单的数据  get('sex')
+        dump($all);
+        $sex = $all['sex'];
+        echo $sex;
+        $age = $request->all()['age'];
+        echo $age;
+        $name = $request->all(['name','sex']);
+        dd($name);
+    }
+    function fc(Request $request,$xx,$yy=99){
+        echo $xx,$yy;
+        echo $request->all()['yuwen'];
+    }
+    function fd($x,$y){
+        $all = Input::all();
+        dump($all);
+        echo $x,$y;
+    }
+
+5、DB
+////////////////////////////////////////////////////////
+Route::get('/add1','TestView@add1');
+Route::get('/add2','TestView@add2');
+Route::get('/add3','TestView@add3');
+
+Route::get('/delete1','TestView@delete1');
+Route::get('/delete2','TestView@delete2');
+
+Route::get('/modify1','TestView@modify1');
+Route::get('/modify2','TestView@modify2');
+
+Route::get('/query1','TestView@query1');
+Route::get('/query2','TestView@query2');
+Route::get('/query3','TestView@query3');
+Route::get('/query4','TestView@query4');
+Route::get('/query5','TestView@query5');
+Route::get('/query6','TestView@query6');
+Route::get('/query7','TestView@query7');
+Route::get('/query8','TestView@query8');
+Route::get('/query9','TestView@query9');
+Route::get('/query10','TestView@query10');
+
+--------------------------
+    function add1(){
+//        $info = DB::table('tb_info');
+//        $data =[
+//            'name'  =>   'liubei',
+//            'sex'   =>   'male',
+//            'hobby' =>   '足球',
+//            'class' =>   '一班',
+//        ];
+//        $rst = $info->insert($data);
+        $rst = DB::insert("insert into tb_info(name,sex,hobby,class) values('liuliu','male','足球','一班')");
+        dd($rst);
+    }
+    function add2(){
+        $info = DB::table('tb_info');
+        $data =[
+            [
+            'name'  =>   'guanyu',
+            'sex'   =>   'male',
+            'hobby' =>   '足球',
+            'class' =>   '一班',
+            ],[
+            'name'  =>   'zhangfei',
+            'sex'   =>   'male',
+            'hobby' =>   '足球',
+            'class' =>   '一班',
+            ],[
+            'name'  =>   'zhaoyun',
+            'sex'   =>   'male',
+            'hobby' =>   '足球',
+            'class' =>   '一班',
+            ]
+        ];
+        $rst = $info->insert($data);
+        dd($rst);
+    }
+    function add3(){
+        $data =
+            [
+                'name'  =>   'guanyu',
+                'sex'   =>   'male',
+                'hobby' =>   '足球',
+                'class' =>   '一班',
+            ];
+        $info = DB::table('tb_info');
+        $id = $info->insertGetid($data);  //获得添加的记录的id号
+        echo $id;
+    }
+    function delete1(){
+        //$info = DB::table('tb_info');
+        //$int = $info->delete(5);  //删除记录的条数
+        $int =DB::delete("delete from tb_info where id = 8");
+        dump($int);
+    }
+    function delete2(){
+        //$info = DB::table('tb_info');
+        //$count =  $info->where('sex','female')->delete();
+        $count = DB::delete("delete from `tb_info` where sex = 'female'");
+        //加where没有必要在delete()方法中加记录id
+        echo $count;
+    }
+    function modify1(){
+//        $info = DB::table('tb_info');
+//        $rst = $info->where('name','liuliu')->update(
+//            ['name'  =>  'liuyuzhou',
+//            ]);
+//        dd($rst);
+        $rst = DB::update("update tb_info set name = 'li' where name = 'guanyu'");
+        dd($rst);
+    }
+    function modify2(){
+        $db = DB::table('tb_info');
+        $rst = $db
+            ->where('sex','male')
+            ->orWhere('name','>','liu')
+            ->update(
+                [
+                    'class' => '一班',
+                    'hobby' => '排球',
+                ]
+            );
+        dd($rst); //受影响记录的个数
+    }
+    function query1(){
+        $info = DB::table('tb_info');
+        $data = $info->select('sex as xingbie','class','name as xingming')->get();
+        dump($data);
+    }
+    function query2(){
+        $info = DB::table('tb_info');
+        $data = $info->select('sex as xingbie','class','name as xingming')->where('sex','male')->get();
+        dump($data);
+    }
+    function query3(){
+        $info = DB::table('tb_info');
+        $data = $info->where('sex','male')->get();
+        foreach ($data as $row){
+            foreach ($row as $v){
+                echo $v."  ";
+            }
+            echo "<br />";
+        }
+    }
+    function query4(){
+        $info = DB::table('tb_info');
+        $data = $info->where('sex','male')->get()->toArray();
+        foreach ($data as $row){
+            foreach ($row as $v){
+                echo $v."  ";
+            }
+            echo "<br />";
+        }
+    }
+    function query5(){
+        $info = DB::table('tb_info');
+        $data = $info->where('sex','male')->get();
+        //$data = $info->where('sex','male')->get()->toArray();
+        foreach ($data as $row){
+            echo $row->id;
+            echo $row->name;
+            echo $row->sex;
+            echo $row->hobby;
+            echo "<br />";
+        }
+    }
+    function query6(){
+        $info = DB::table('tb_info');
+        $rst = $info->limit(3)->offset(5)->get();  //从6开始 共计3个记录
+        dd($rst);
+    }
+    function query7(){
+        $user = DB::table('tb_user');
+        //$rst = $user->where('user','liubei')->where('password','123456')->get()->toArray();
+        $rst = $user->where(['user'=>'liubei','password'=>'123456'])->get()->toArray();
+        if ($rst)
+            echo "用户名和密码都正确";
+        else
+            echo "用户名或者密码错误";
+    }
+    function query8(){
+        //$info = DB::table('tb_info');
+        $rst = DB::select("select max(`id`) from tb_info where sex = 'male'");
+        dd($rst);
+    }
+    function query9(){
+        //$info = DB::table('tb_info');
+        //$rst =DB::statement("select max(`id`) from tb_info where sex = 'male'");
+        //dd($rst);
+    }
+    function query10(){
+        $info = DB::table('tb_info');
+        $data = $info->get()->toArray();
+        return view('showform',compact('data'))->with('data1',$data);
+    }
+
+6、foreach、if标签
+<html>
+   <table align = 'center'  border = '1'>
+       @foreach($data1 as $value)
+           {{$loop->index}}
+          @if(strpos($value->name,'关')===false)
+          <tr>
+             @foreach($value as $v)
+                  <td>{{$v}}</td>
+             @endforeach
+          </tr>
+         @else
+          <tr>
+             @foreach($value as $v)
+                  <td><font color="red">{{$v}}</font></td>
+             @endforeach
+           </tr>
+         @endif
+           {{$loop->count}}
+       @endforeach
+   </table>
+</html>
+ 
